@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable @typescript-eslint/ban-types */
 import React, {
   createContext,
   useCallback,
@@ -8,17 +10,9 @@ import React, {
 import AsyncStorage from '@react-native-community/async-storage';
 import api from '../services/api';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar_url: string;
-  // aqui devera ser colocado o nome da empresa
-}
-
 interface AuthState {
   token: string;
-  user: User;
+  user: object;
 }
 
 interface SignInCredentials {
@@ -27,16 +21,17 @@ interface SignInCredentials {
 }
 
 interface AuthContextData {
-  user: User;
+  user: object;
+  loading: boolean;
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
-  updateUser(user: User): void;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 const AuthProvider: React.FC = ({ children }) => {
   const [data, setData] = useState<AuthState>({} as AuthState);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadStoragedData(): Promise<void> {
@@ -49,7 +44,7 @@ const AuthProvider: React.FC = ({ children }) => {
         setData({ token: token[1], user: JSON.parse(user[1]) });
       }
 
-      // return {} as AuthState;
+      setLoading(false);
     }
 
     loadStoragedData();
@@ -65,23 +60,19 @@ const AuthProvider: React.FC = ({ children }) => {
 
     await AsyncStorage.multiSet([
       ['@Gobarber:token', token],
-      ['@Gobarber:user', JSON.stringify(user)],
+      ['@Gobarber:user', JSON.stringify(user)], // Colocar aqui a empresa para gravar no Storage
     ]);
-
-    // Colocar aqui a empresa para gravar no Storage
-    api.defaults.headers.authorization = `Bearer ${token}`;
 
     setData({ token, user });
   }, []);
 
   const signOut = useCallback(async () => {
-    await AsyncStorage.multiRemove(['@Gobarber:token', '@Gobarber:user']);
-
+    await AsyncStorage.multiRemove(['@Gobarber:user', '@Gobarber:token']);
     setData({} as AuthState);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user: data.user, signIn, signOut }}>
+    <AuthContext.Provider value={{ user: data.user, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

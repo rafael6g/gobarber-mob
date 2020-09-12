@@ -14,7 +14,6 @@ import * as Yup from 'yup';
 
 import { Form } from '@unform/mobile';
 import { FormHandles } from '@unform/core';
-// import api from '../../services/api';
 
 import { useAuth } from '../../hooks/auth';
 
@@ -45,6 +44,8 @@ const SignIn: React.FC = () => {
   const navigation = useNavigation();
 
   const { signIn } = useAuth();
+  // const { signIn, user } = useAuth();
+  // console.log(user);
 
   const handleSignIn = useCallback(
     async (data: SignInFormData) => {
