@@ -36,6 +36,7 @@
     "no-use-before-define": "off",
     "@typescript-eslint/camelcase": "off",
     "no-unused-expressions": "off",
+    "import/no-duplicates": "off",
     "@typescritp-eslint/explicit-function-return-type": [
       "error",
       {
